@@ -1,0 +1,10 @@
+# Copie para key.properties e preencha. Caminho do storeFile relativo à pasta android/
+# (ex.: upload-keystore.jks ao lado deste ficheiro).
+#
+# Gerar keystore (exemplo):
+#   keytool -genkey -v -keystore upload-keystore.jks -keyalg RSA -keysize 2048 -validity 10000 -alias upload
+
+storePassword=sua_senha_do_keystore
+keyPassword=sua_senha_da_chave
+keyAlias=upload
+storeFile=upload-keystore.jks

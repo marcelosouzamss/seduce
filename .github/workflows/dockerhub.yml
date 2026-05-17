@@ -1,0 +1,31 @@
+# Build e push da imagem Docker da API (pasta backend/) para o Docker Hub.
+#
+# Configure no GitHub: Settings → Secrets and variables → Actions
+#   DOCKERHUB_USERNAME  (ex.: marcelosouzams)
+#   DOCKERHUB_TOKEN     (Access Token do Docker Hub — nunca commite tokens no repo)
+#
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  docker:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Baixar código
+        uses: actions/checkout@v4
+
+      - name: Login no Docker Hub
+        uses: docker/login-action@v3
+        with:
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Build e push da imagem
+        uses: docker/build-push-action@v6
+        with:
+          context: ./backend
+          file: ./backend/Dockerfile
+          push: true
+          tags: marcelosouzams/seduce:latest
