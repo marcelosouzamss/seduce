@@ -65,8 +65,28 @@ registerMeRoutes(app, pool);
 registerAdsRoutes(app, pool, uploadMw);
 const port = Number(process.env.PORT) || 3000;
 
+/** Postgres pode demorar alguns segundos no Docker; evita ECONNREFUSED ao arranque. */
+async function bootstrapWhenDbReady(maxAttempts = 35, delayMs = 2000): Promise<void> {
+  let lastErr: unknown;
+  for (let attempt = 1; attempt <= maxAttempts; attempt++) {
+    try {
+      await pool.query("SELECT 1");
+      await bootstrapDb(pool);
+      return;
+    } catch (err) {
+      lastErr = err;
+      const msg = err instanceof Error ? err.message : String(err);
+      console.error(`Aguardando Postgres (${attempt}/${maxAttempts}): ${msg}`);
+      if (attempt < maxAttempts) {
+        await new Promise((r) => setTimeout(r, delayMs));
+      }
+    }
+  }
+  throw lastErr;
+}
+
 async function start() {
-  await bootstrapDb(pool);
+  await bootstrapWhenDbReady();
   app.listen(port, () => {
     console.log(`API http://localhost:${port}`);
   });
